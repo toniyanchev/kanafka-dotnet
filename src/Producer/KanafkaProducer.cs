@@ -4,29 +4,22 @@ using Kanafka.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Kanafka.Producing;
+namespace Kanafka.Producer;
 
-public class Producer
+public class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory serviceScopeFactory)
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly IProducer<string, string> _confluentProducer;
-
-    public Producer(IOptions<Settings> options, IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-        _confluentProducer = CreateProducer(options);
-    }
+    private readonly IProducer<string, string> _confluentProducer = CreateProducer(options);
 
     public async Task SendAsync<TMessage>(string topic, TMessage message, CancellationToken cancellationToken)
         where TMessage : class
     {
-        var kafkaMessage = MessageHelper.CreateMessage(message);
+        var kafkaMessage = MessageFactory.Create(message);
         await _confluentProducer.ProduceAsync(topic, kafkaMessage, cancellationToken);
     }
 
     public async Task SendAsync(string topic, string message, CancellationToken cancellationToken)
     {
-        var kafkaMessage = MessageHelper.CreateMessage(message);
+        var kafkaMessage = MessageFactory.Create(message);
         await _confluentProducer.ProduceAsync(topic, kafkaMessage, cancellationToken);
     }
 
@@ -37,7 +30,7 @@ public class Producer
         CancellationToken cancellationToken)
         where TMessage : class
     {
-        var kafkaMessage = MessageHelper.CreateMessage(message);
+        var kafkaMessage = MessageFactory.Create(message);
 
         if (delayTime > TimeSpan.FromSeconds(60))
             await DelayInDatabase(topic, kafkaMessage, DateTime.Now + delayTime, cancellationToken);
@@ -49,7 +42,7 @@ public class Producer
         CancellationToken cancellationToken)
         where TMessage : class
     {
-        var kafkaMessage = MessageHelper.CreateMessage(message);
+        var kafkaMessage = MessageFactory.Create(message);
         var now = DateTime.Now;
         var delaySeconds = (delayTo - now).TotalSeconds;
 
@@ -72,7 +65,7 @@ public class Producer
         CancellationToken cancellationToken)
     {
         var taskId = Guid.NewGuid();
-        using var scope = _serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var options = scope.ServiceProvider.GetRequiredService<IOptions<Settings>>();
         Task.Run(async () =>
         {

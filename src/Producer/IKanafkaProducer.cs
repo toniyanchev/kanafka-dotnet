@@ -1,11 +1,11 @@
 using Confluent.Kafka;
 
-namespace Kanafka.Producing;
+namespace Kanafka.Producer;
 
 /// <summary>
 /// Factory from where can be produced kafka messages.
 /// </summary>
-public interface IProducer : IDisposable
+public interface IKanafkaProducer : IDisposable
 {
     /// <summary>Produces a message to a Kafka topic.</summary>
     /// <param name="topic">Name of the topic to which the message is produced.</param>

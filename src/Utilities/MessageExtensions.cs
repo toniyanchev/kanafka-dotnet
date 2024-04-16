@@ -4,38 +4,8 @@ using Confluent.Kafka;
 
 namespace Kanafka.Utilities;
 
-public static class MessageHelper
+public static class MessageExtensions
 {
-    public static Message<string, string> CreateMessage<TMessage>(TMessage messageBody)
-        where TMessage : notnull
-    {
-        var messageType = messageBody.GetType();
-        var jsonMessage = JsonSerializer.Serialize(messageBody, messageType);
-        var kafkaMessage = new Message<string, string>
-        {
-            Key = Guid.NewGuid().ToString(),
-            Value = jsonMessage,
-            Headers = new Headers()
-        };
-
-        var className = messageType.Name;
-        kafkaMessage.AddHeader("X-Type", className);
-
-        return kafkaMessage;
-    }
-
-    public static Message<string, string> CreateMessage(string messageBody)
-    {
-        var kafkaMessage = new Message<string, string>
-        {
-            Key = Guid.NewGuid().ToString(),
-            Value = messageBody,
-            Headers = new Headers()
-        };
-
-        return kafkaMessage;
-    }
-
     public static T GetContent<T>(this Message<string, string> message)
         where T : struct
     {
