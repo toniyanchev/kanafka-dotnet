@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kanafka.Producer;
 
-public class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory serviceScopeFactory)
+internal class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory serviceScopeFactory) : IKanafkaProducer
 {
     private readonly IProducer<string, string> _confluentProducer = CreateProducer(options);
 
@@ -33,7 +33,7 @@ public class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory se
         var kafkaMessage = MessageFactory.Create(message);
 
         if (delayTime > TimeSpan.FromSeconds(60))
-            await DelayInDatabase(topic, kafkaMessage, DateTime.Now + delayTime, cancellationToken);
+            await DelayInDatabaseAsync(topic, kafkaMessage, DateTime.Now + delayTime, cancellationToken);
         else
             DelayInMemory(topic, kafkaMessage, (int)delayTime.TotalSeconds, cancellationToken);
     }
@@ -47,12 +47,12 @@ public class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory se
         var delaySeconds = (delayTo - now).TotalSeconds;
 
         if (delaySeconds > 60)
-            await DelayInDatabase(topic, kafkaMessage, delayTo, cancellationToken);
+            await DelayInDatabaseAsync(topic, kafkaMessage, delayTo, cancellationToken);
         else
             DelayInMemory(topic, kafkaMessage, (int)delaySeconds, cancellationToken);
     }
 
-    private async Task DelayInDatabase(string topic, Message<string, string> message, DateTime delayTo,
+    private async Task DelayInDatabaseAsync(string topic, Message<string, string> message, DateTime delayTo,
         CancellationToken cancellationToken)
     {
         message.AddHeader("X-Delay-Timestamp", delayTo.ToString(CultureInfo.CurrentCulture));
@@ -85,7 +85,7 @@ public class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory se
 
         DelayedMessageCacher.CacheThreadId(taskId);
     }
-    
+
     public void Dispose()
     {
         _confluentProducer.Dispose();
@@ -99,7 +99,6 @@ public class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory se
             EnableIdempotence = true,
             Acks = Acks.All,
             LingerMs = 50,
-            ClientId = "oss",
             // SslCaLocation = options.Value.CaFilePath,
             // SslCertificateLocation = options.Value.CertFilePath,
             // SslKeyLocation = options.Value.KeyFilePath,

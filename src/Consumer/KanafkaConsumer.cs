@@ -1,4 +1,5 @@
 using Confluent.Kafka;
+using Kanafka.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kanafka.Consumer;
 
-public class KanafkaConsumer<TConsumer> : BackgroundService
+internal class KanafkaConsumer<TConsumer> : BackgroundService
     where TConsumer : IKanafkaConsumer
 {
     private readonly string _topic;
@@ -83,8 +84,8 @@ public class KanafkaConsumer<TConsumer> : BackgroundService
         try
         {
             using var scope = _serviceScopeFactory.CreateScope();
-            var failedMessageHelper = scope.ServiceProvider.GetRequiredService<IFailedMessageHelper>();
-            await failedMessageHelper.Create(failedMessage);
+            var failedMessageHelper = scope.ServiceProvider.GetRequiredService<IFailedMessagePersister>();
+            await failedMessageHelper.PersistAsync(failedMessage);
         }
         catch (Exception e)
         {

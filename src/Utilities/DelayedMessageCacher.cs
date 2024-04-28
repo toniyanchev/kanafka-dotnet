@@ -2,9 +2,9 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Kanafka.Utilities;
 
-public static class DelayedMessageCacher
+internal static class DelayedMessageCacher
 {
-    private const string CacheKey = "backgroundThreadIds";
+    private const string CacheKey = "kanafkaBackgroundThreadIds";
     private static readonly IMemoryCache MemoryCache = new MemoryCache(new MemoryCacheOptions());
     private static readonly object Lock = new();
 
@@ -29,7 +29,7 @@ public static class DelayedMessageCacher
         }
     }
 
-    private static List<Guid> GetCachedThreadIds()
+    public static List<Guid> GetCachedThreadIds()
     {
         lock (Lock)
         {

@@ -18,9 +18,4 @@
   </ItemGroup>
 
 
-
-  <ItemGroup>
-    <Folder Include="Failing\" />
-  </ItemGroup>
-
 </Project>
