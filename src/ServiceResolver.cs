@@ -1,5 +1,6 @@
 using Kanafka.Consumer;
 using Kanafka.Producer;
+using Kanafka.Storage;
 using Kanafka.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,17 +12,24 @@ namespace Kanafka;
 public static class ServiceResolver
 {
     /// <summary>Must use this method when working with Kafka. It adds its required dependencies.</summary>
-    /// <param name="services">Your application's service collection</param>
-    public static void AddKanafka(this IServiceCollection services)
+    /// <param name="services">Your application's service collection.</param>
+    /// <param name="persistenceConfigurationFunc">Persistence configuration for Kanafka.</param>
+    public static void AddKanafka(
+        this IServiceCollection services,
+        Func<StorageConfiguration> persistenceConfigurationFunc)
     {
         services
-            .AddOptions<Settings>()
+            .AddOptions<KanafkaSettings>()
             .BindConfiguration("Kanafka")
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
         services.AddScoped<IKanafkaProducer, KanafkaProducer>();
         EnableDelayedMessages();
+
+        var persistenceConfiguration = persistenceConfigurationFunc();
+        foreach (var service in persistenceConfiguration.ServiceCollection)
+            services.Add(service);
     }
 
     /// <summary>Use this method to register your Kanafka consumers.</summary>
@@ -42,10 +50,11 @@ public static class ServiceResolver
         {
             services.AddSingleton(provider =>
             {
-                var options = provider.GetRequiredService<IOptions<Settings>>();
+                var options = provider.GetRequiredService<IOptions<KanafkaSettings>>();
                 var logger = provider.GetRequiredService<ILogger<TConsumer>>();
                 var serviceScopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
-                return (IHostedService)new KanafkaConsumer<TConsumer>(topic, kanafkaConsumerOptions, options, logger, serviceScopeFactory);
+                return (IHostedService)new KanafkaConsumer<TConsumer>(topic, kanafkaConsumerOptions, options, logger,
+                    serviceScopeFactory);
             });
         }
     }

@@ -1,5 +1,5 @@
 using Confluent.Kafka;
-using Kanafka.Persistence;
+using Kanafka.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -15,10 +15,10 @@ internal class KanafkaConsumer<TConsumer> : BackgroundService
     private readonly ILogger<TConsumer> _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public KanafkaConsumer(
+    internal KanafkaConsumer(
         string topic,
         KanafkaConsumerOptions kanafkaConsumerOptions,
-        IOptions<Settings> options,
+        IOptions<KanafkaSettings> options,
         ILogger<TConsumer> logger,
         IServiceScopeFactory serviceScopeFactory)
     {
@@ -42,12 +42,12 @@ internal class KanafkaConsumer<TConsumer> : BackgroundService
     {
         await Task.Yield();
 
-        var consumer = new ConsumerBuilder<string, string>(_consumerConfig).Build();
+        var consumer = new ConsumerBuilder<Guid, string>(_consumerConfig).Build();
         consumer.Subscribe(_topic);
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            ConsumeResult<string, string>? consumeResult = null;
+            ConsumeResult<Guid, string>? consumeResult = null;
 
             try
             {

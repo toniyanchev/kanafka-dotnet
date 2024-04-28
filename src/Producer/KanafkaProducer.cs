@@ -6,9 +6,9 @@ using Microsoft.Extensions.Options;
 
 namespace Kanafka.Producer;
 
-internal class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory serviceScopeFactory) : IKanafkaProducer
+internal class KanafkaProducer(IOptions<KanafkaSettings> options, IServiceScopeFactory serviceScopeFactory) : IKanafkaProducer
 {
-    private readonly IProducer<string, string> _confluentProducer = CreateProducer(options);
+    private readonly IProducer<Guid, string> _confluentProducer = CreateProducer(options);
 
     public async Task SendAsync<TMessage>(string topic, TMessage message, CancellationToken cancellationToken)
         where TMessage : class
@@ -23,7 +23,7 @@ internal class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory 
         await _confluentProducer.ProduceAsync(topic, kafkaMessage, cancellationToken);
     }
 
-    public async Task SendAsync(string topic, Message<string, string> message, CancellationToken cancellationToken) =>
+    public async Task SendAsync(string topic, Message<Guid, string> message, CancellationToken cancellationToken) =>
         await _confluentProducer.ProduceAsync(topic, message, cancellationToken);
 
     public async Task SendDelayedAsync<TMessage>(string topic, TMessage message, TimeSpan delayTime,
@@ -52,7 +52,7 @@ internal class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory 
             DelayInMemory(topic, kafkaMessage, (int)delaySeconds, cancellationToken);
     }
 
-    private async Task DelayInDatabaseAsync(string topic, Message<string, string> message, DateTime delayTo,
+    private async Task DelayInDatabaseAsync(string topic, Message<Guid, string> message, DateTime delayTo,
         CancellationToken cancellationToken)
     {
         message.AddHeader("X-Delay-Timestamp", delayTo.ToString(CultureInfo.CurrentCulture));
@@ -61,12 +61,12 @@ internal class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory 
         await _confluentProducer.ProduceAsync("kanafka-delayed-messages", message, cancellationToken);
     }
 
-    private void DelayInMemory(string topic, Message<string, string> message, int forSeconds,
+    private void DelayInMemory(string topic, Message<Guid, string> message, int forSeconds,
         CancellationToken cancellationToken)
     {
         var taskId = Guid.NewGuid();
         using var scope = serviceScopeFactory.CreateScope();
-        var options = scope.ServiceProvider.GetRequiredService<IOptions<Settings>>();
+        var options = scope.ServiceProvider.GetRequiredService<IOptions<KanafkaSettings>>();
         Task.Run(async () =>
         {
             try
@@ -91,7 +91,7 @@ internal class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory 
         _confluentProducer.Dispose();
     }
 
-    private static IProducer<string, string> CreateProducer(IOptions<Settings> options)
+    private static IProducer<Guid, string> CreateProducer(IOptions<KanafkaSettings> options)
     {
         var producerConfig = new ProducerConfig
         {
@@ -104,6 +104,6 @@ internal class KanafkaProducer(IOptions<Settings> options, IServiceScopeFactory 
             // SslKeyLocation = options.Value.KeyFilePath,
             // SecurityProtocol = SecurityProtocol.Ssl
         };
-        return new ProducerBuilder<string, string>(producerConfig).Build();
+        return new ProducerBuilder<Guid, string>(producerConfig).Build();
     }
 }

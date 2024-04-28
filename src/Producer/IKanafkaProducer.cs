@@ -25,7 +25,7 @@ public interface IKanafkaProducer : IDisposable
     /// <param name="topic">Name of the topic to which the message is produced.</param>
     /// <param name="message">Kafka Message object.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    Task SendAsync(string topic, Message<string, string> message, CancellationToken cancellationToken);
+    Task SendAsync(string topic, Message<Guid, string> message, CancellationToken cancellationToken);
 
     /// <summary>Produces a message to a Kafka topic.</summary>
     /// <param name="topic">Name of the topic to which the message is produced.</param>

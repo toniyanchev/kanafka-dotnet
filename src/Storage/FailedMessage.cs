@@ -2,15 +2,15 @@ using System.Text.Json;
 using Confluent.Kafka;
 using Kanafka.Utilities;
 
-namespace Kanafka.Persistence;
+namespace Kanafka.Storage;
 
 public class FailedMessage
 {
-    public FailedMessage(ConsumeResult<string, string> consumeResult, Exception ex)
+    public FailedMessage(ConsumeResult<Guid, string> consumeResult, Exception ex)
     {
         Topic = consumeResult.Topic;
         CreatedOn = DateTime.Now;
-        MessageId = new Guid(consumeResult.Message.Key);
+        MessageId = consumeResult.Message.Key;
         MessageBody = consumeResult.Message.Value;
         messageHeaders = consumeResult.Message.GetHeaders();
         ExceptionType = ex.GetType().FullName;

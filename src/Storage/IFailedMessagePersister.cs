@@ -1,4 +1,4 @@
-namespace Kanafka.Persistence;
+namespace Kanafka.Storage;
 
 public interface IFailedMessagePersister
 {

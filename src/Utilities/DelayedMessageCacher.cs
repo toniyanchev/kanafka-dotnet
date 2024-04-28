@@ -8,7 +8,7 @@ internal static class DelayedMessageCacher
     private static readonly IMemoryCache MemoryCache = new MemoryCache(new MemoryCacheOptions());
     private static readonly object Lock = new();
 
-    public static void CacheThreadId(Guid threadId)
+    internal static void CacheThreadId(Guid threadId)
     {
         lock (Lock)
         {
@@ -18,7 +18,7 @@ internal static class DelayedMessageCacher
         }
     }
 
-    public static void DiscardThreadId(Guid threadId)
+    internal static void DiscardThreadId(Guid threadId)
     {
         lock (Lock)
         {
@@ -29,7 +29,7 @@ internal static class DelayedMessageCacher
         }
     }
 
-    public static List<Guid> GetCachedThreadIds()
+    internal static List<Guid> GetCachedThreadIds()
     {
         lock (Lock)
         {

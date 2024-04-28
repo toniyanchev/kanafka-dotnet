@@ -1,21 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <RootNamespace>Kanafka</RootNamespace>
-    <AssemblyName>Kanafka</AssemblyName>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Kanafka</RootNamespace>
+        <AssemblyName>Kanafka</AssemblyName>
+        <PackageId>Kanafka.Core</PackageId>
+        <Version>0.0.1</Version>
+        <Authors>Anton Yanchev</Authors>
+        <Company>Kanafka</Company>
+        <Product>Kanafka Core</Product>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageTags>Kafka;Kanafka;Messaging;Broker</PackageTags>
+        <PackageIcon>logo.png</PackageIcon>
+        <RepositoryUrl>https://github.com/toniyanchev/kanafka-dotnet</RepositoryUrl>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Confluent.Kafka" Version="2.3.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
-    <PackageReference Include="Npgsql" Version="8.0.1" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Confluent.Kafka" Version="2.3.0"/>
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0"/>
+    </ItemGroup>
 
+    <ItemGroup>
+        <None Include="../README.md" Pack="true" PackagePath="/"/>
+        <None Include="../LICENSE" Pack="true" PackagePath="/"/>
+        <None Include="../logo.png" Pack="true" PackagePath="/"/>
+    </ItemGroup>
 
 </Project>
