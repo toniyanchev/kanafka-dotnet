@@ -38,20 +38,20 @@ internal class KanafkaConsumer<TConsumer> : BackgroundService
         };
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken cancelationToken)
     {
         await Task.Yield();
 
         var consumer = new ConsumerBuilder<string, string>(_consumerConfig).Build();
         consumer.Subscribe(_topic);
 
-        while (!stoppingToken.IsCancellationRequested)
+        while (!cancelationToken.IsCancellationRequested)
         {
             ConsumeResult<string, string>? consumeResult = null;
 
             try
             {
-                consumeResult = consumer.Consume(stoppingToken);
+                consumeResult = consumer.Consume(cancelationToken);
                 _logger.LogInformation(
                     $"Received message: {consumeResult.Message.Key} from topic {_topic}[{consumeResult.Partition.Value}]");
                 _logger.LogDebug(consumeResult.Message.Value);
@@ -62,14 +62,14 @@ internal class KanafkaConsumer<TConsumer> : BackgroundService
             }
             catch (Exception e)
             {
-                if (stoppingToken.IsCancellationRequested)
+                if (cancelationToken.IsCancellationRequested)
                     return;
 
                 _logger.LogError("Error while consuming message");
                 if (consumeResult is { Message: not null } and { Topic: not null })
                 {
                     var failedMessage = new FailedMessage(consumeResult, e);
-                    await FailConsuming(failedMessage);
+                    await FailConsuming(failedMessage, cancelationToken);
                 }
                 else
                 {
@@ -79,13 +79,13 @@ internal class KanafkaConsumer<TConsumer> : BackgroundService
         }
     }
 
-    private async Task FailConsuming(FailedMessage failedMessage)
+    private async Task FailConsuming(FailedMessage failedMessage, CancellationToken cancellationToken)
     {
         try
         {
             using var scope = _serviceScopeFactory.CreateScope();
             var failedMessageHelper = scope.ServiceProvider.GetRequiredService<IFailedMessagePersister>();
-            await failedMessageHelper.PersistAsync(failedMessage);
+            await failedMessageHelper.PersistAsync(failedMessage, cancellationToken);
         }
         catch (Exception e)
         {

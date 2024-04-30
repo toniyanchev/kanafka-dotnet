@@ -16,6 +16,8 @@ public class FailedMessage
         ExceptionType = ex.GetType().FullName;
         ExceptionMessage = ex.Message;
         ExceptionStackTrace = ex.StackTrace;
+        InnerExceptionType = ex.InnerException?.GetType().FullName;
+        InnerExceptionMessage = ex.InnerException?.Message;
         if (int.TryParse(consumeResult.Message.GetHeader("X-Retries"), out var retries))
             Retries = retries;
     }
@@ -36,6 +38,10 @@ public class FailedMessage
     public string? ExceptionMessage { get; set; }
 
     public string? ExceptionStackTrace { get; set; }
+    
+    public string? InnerExceptionType { get; set; }
+
+    public string? InnerExceptionMessage { get; set; }
 
     public int Retries { get; set; }
 }

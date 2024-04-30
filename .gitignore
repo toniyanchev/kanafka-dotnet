@@ -5,6 +5,8 @@
 
 kanafka-dotnet.sln
 
+*/.idea
+
 # User-specific files
 *.rsuser
 *.suo

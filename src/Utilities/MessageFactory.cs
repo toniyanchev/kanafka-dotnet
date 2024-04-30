@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Confluent.Kafka;
 
 namespace Kanafka.Utilities;
@@ -9,7 +10,11 @@ public static class MessageFactory
         where TMessage : notnull
     {
         var messageType = messageBody.GetType();
-        var jsonMessage = JsonSerializer.Serialize(messageBody, messageType);
+        var options = new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+        var jsonMessage = JsonSerializer.Serialize(messageBody, messageType, options);
         var kafkaMessage = new Message<string, string>
         {
             Key = Guid.NewGuid().ToString(),
