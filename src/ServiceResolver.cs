@@ -13,10 +13,7 @@ public static class ServiceResolver
 {
     /// <summary>Must use this method when working with Kafka. It adds its required dependencies.</summary>
     /// <param name="services">Your application's service collection.</param>
-    /// <param name="persistenceConfigurationFunc">Persistence configuration for Kanafka.</param>
-    public static void AddKanafka(
-        this IServiceCollection services,
-        Func<StorageConfiguration> persistenceConfigurationFunc)
+    public static void AddKanafka(this IServiceCollection services)
     {
         services
             .AddOptions<KanafkaSettings>()
@@ -26,10 +23,6 @@ public static class ServiceResolver
 
         services.AddScoped<IKanafkaProducer, KanafkaProducer>();
         EnableDelayedMessages();
-
-        var persistenceConfiguration = persistenceConfigurationFunc();
-        foreach (var service in persistenceConfiguration.ServiceCollection)
-            services.Add(service);
     }
 
     /// <summary>Use this method to register your Kanafka consumers.</summary>

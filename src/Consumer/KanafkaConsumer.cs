@@ -33,7 +33,7 @@ internal class KanafkaConsumer<TConsumer> : BackgroundService
             // SslCertificateLocation = settings.CertFilePath,
             // SslKeyLocation = settings.KeyFilePath,
             AutoOffsetReset = AutoOffsetReset.Earliest,
-            SecurityProtocol = SecurityProtocol.Ssl,
+            // SecurityProtocol = SecurityProtocol.Ssl,
             GroupId = kanafkaConsumerOptions.GroupName ?? $"{_topic}-consumer-group"
         };
     }
@@ -42,12 +42,12 @@ internal class KanafkaConsumer<TConsumer> : BackgroundService
     {
         await Task.Yield();
 
-        var consumer = new ConsumerBuilder<Guid, string>(_consumerConfig).Build();
+        var consumer = new ConsumerBuilder<string, string>(_consumerConfig).Build();
         consumer.Subscribe(_topic);
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            ConsumeResult<Guid, string>? consumeResult = null;
+            ConsumeResult<string, string>? consumeResult = null;
 
             try
             {

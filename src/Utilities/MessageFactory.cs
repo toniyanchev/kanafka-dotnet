@@ -5,14 +5,14 @@ namespace Kanafka.Utilities;
 
 public static class MessageFactory
 {
-    public static Message<Guid, string> Create<TMessage>(TMessage messageBody)
+    public static Message<string, string> Create<TMessage>(TMessage messageBody)
         where TMessage : notnull
     {
         var messageType = messageBody.GetType();
         var jsonMessage = JsonSerializer.Serialize(messageBody, messageType);
-        var kafkaMessage = new Message<Guid, string>
+        var kafkaMessage = new Message<string, string>
         {
-            Key = Guid.NewGuid(),
+            Key = Guid.NewGuid().ToString(),
             Value = jsonMessage,
             Headers = new Headers()
         };
@@ -23,11 +23,11 @@ public static class MessageFactory
         return kafkaMessage;
     }
 
-    public static Message<Guid, string> Create(string messageBody)
+    public static Message<string, string> Create(string messageBody)
     {
-        var kafkaMessage = new Message<Guid, string>
+        var kafkaMessage = new Message<string, string>
         {
-            Key = Guid.NewGuid(),
+            Key = Guid.NewGuid().ToString(),
             Value = messageBody,
             Headers = new Headers()
         };

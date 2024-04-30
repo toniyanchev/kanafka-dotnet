@@ -6,11 +6,11 @@ namespace Kanafka.Storage;
 
 public class FailedMessage
 {
-    public FailedMessage(ConsumeResult<Guid, string> consumeResult, Exception ex)
+    public FailedMessage(ConsumeResult<string, string> consumeResult, Exception ex)
     {
         Topic = consumeResult.Topic;
-        CreatedOn = DateTime.Now;
-        MessageId = consumeResult.Message.Key;
+        CreatedOn = DateTime.UtcNow;
+        MessageId = new Guid(consumeResult.Message.Key);
         MessageBody = consumeResult.Message.Value;
         messageHeaders = consumeResult.Message.GetHeaders();
         ExceptionType = ex.GetType().FullName;
