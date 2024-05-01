@@ -7,12 +7,13 @@ namespace Kanafka.Utilities;
 public static class MessageExtensions
 {
     public static T GetContent<T>(this Message<string, string> message)
-        where T : struct
+        where T : new()
     {
         var messageBody = message.Value;
-
         var messageObj = JsonSerializer.Deserialize<T>(messageBody);
-        return messageObj;
+
+        return messageObj ??
+            throw new InvalidOperationException($"Kafka message could not be deserialized to type {typeof(T)}");
     }
 
     public static string? GetHeader(this Message<string, string> message, string key)

@@ -9,7 +9,7 @@ public class FailedMessage
     public FailedMessage(ConsumeResult<string, string> consumeResult, Exception ex)
     {
         Topic = consumeResult.Topic;
-        CreatedOn = DateTime.UtcNow;
+        FailedOn = DateTime.UtcNow;
         MessageId = new Guid(consumeResult.Message.Key);
         MessageBody = consumeResult.Message.Value;
         messageHeaders = consumeResult.Message.GetHeaders();
@@ -22,7 +22,7 @@ public class FailedMessage
             Retries = retries;
     }
 
-    public DateTime CreatedOn { get; set; }
+    public DateTime FailedOn { get; set; }
 
     public string Topic { get; set; }
 
